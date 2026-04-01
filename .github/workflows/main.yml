@@ -1,0 +1,33 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # 每6小时同步一次
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync with upstream (merge instead of overwrite)
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          # 添加 upstream
+          git remote add upstream https://github.com/NanmiCoder/claude-code-haha.git
+
+          # 拉取 upstream
+          git fetch upstream
+
+          # 切换到 main
+          git checkout main
+
+          # 合并 upstream（关键：不会删除你的文件）
+          git merge upstream/main --no-edit || true
+
+          # 推送回你的仓库
+          git push origin main
